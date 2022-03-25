@@ -5,5 +5,4 @@ Servicio backend en Nodejs para el software de manejo de reservas de una hoteler
 npm install
 
 ## Librerias adicionales globales
-npm install -g typescript
-npm install -g ts-node
+npm install -g typescript ts-node
