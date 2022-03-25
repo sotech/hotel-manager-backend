@@ -4,12 +4,14 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start":"npm server.js",
-    "dev": "nodemon server.js"
+    "start": "tsc && npm dist/server.js",
+    "dev": "nodemon src/server.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/express": "^4.17.13",
+    "@types/node": "^17.0.23",
     "bcrypt": "^5.0.1",
     "express": "^4.17.3",
     "mongoose": "^6.2.8"
