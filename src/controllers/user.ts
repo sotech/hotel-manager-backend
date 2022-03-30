@@ -4,9 +4,17 @@ import { UserType } from "../types/types";
 import { createUser, existsEmail, existsUsername, findUsers } from "../api/user";
 import { UserModel } from "../models/user";
 import { sendMail } from "../utils/mailer";
+import { validationResult } from "express-validator";
 
 const registerUser = async (req: Request, res: Response, next: NextFunction) => {
   const { username, email, password, fullname } = req.body;
+  const errors = validationResult(req);
+
+  if(!errors.isEmpty()){
+    res.status(422).json({msg:errors.array()[0].msg});
+    return;
+  }
+
   const user: UserType = {
     username,
     email,
@@ -26,6 +34,7 @@ const registerUser = async (req: Request, res: Response, next: NextFunction) => 
 
   const userCreated = await createUser(user);
   if (userCreated){
+    //Mail al usuario
     sendMail({
       to: user.email,
       subject: 'Usuario creado',
@@ -37,6 +46,7 @@ const registerUser = async (req: Request, res: Response, next: NextFunction) => 
             </ul>
       `
     })
+    //Mail al administrador
     sendMail({
       to: 'hotel.notifier@gmail.com',
       subject: 'Usuario creado',
