@@ -3,7 +3,7 @@ import * as bcrypt from 'bcrypt';
 import { UserType } from "../types/types";
 import { createUser, existsEmail, existsUsername, findUsers } from "../api/user";
 import { UserModel } from "../models/user";
-
+import { sendMail } from "../utils/mailer";
 
 const registerUser = async (req: Request, res: Response, next: NextFunction) => {
   const { username, email, password, fullname } = req.body;
@@ -15,18 +15,41 @@ const registerUser = async (req: Request, res: Response, next: NextFunction) => 
   }
 
   if (await existsEmail(email)) {
-    res.status(400).json({ msg: "Error. Email en uso" })
+    res.status(400).json({ msg: "Error. Email en uso", code: 'ERROR_EMAIL_USED' })
     return;
   }
 
   if (await existsUsername(username)) {
-    res.status(400).json({ msg: "Error. Username en uso" })
+    res.status(400).json({ msg: "Error. Username en uso", code: 'ERROR_USERNAME_USED' })
     return;
   }
 
   const userCreated = await createUser(user);
-  if (userCreated)
+  if (userCreated){
+    sendMail({
+      to: user.email,
+      subject: 'Usuario creado',
+      html: `Usuario creado. Datos:
+            <ul>
+            <li>Nombre completo:${user.fullname}</li>
+            <li>Usuario: ${user.username}</li>
+            <li>Email:${user.email}</li>
+            </ul>
+      `
+    })
+    sendMail({
+      to: 'hotel.notifier@gmail.com',
+      subject: 'Usuario creado',
+      html: `Usuario creado. Datos:
+            <ul>
+            <li>Nombre completo:${user.fullname}</li>
+            <li>Usuario: ${user.username}</li>
+            <li>Email:${user.email}</li>
+            </ul>
+      `
+    })
     res.status(201).json({ msg: "Exito", userCreated })
+  }
   else
     res.status(500).json({ msg: "Error", userCreated })
 };
