@@ -11,12 +11,11 @@ const existsEmail = async (email: string): Promise<boolean> => {
     return !!user
 }
 
-const existsUsername = async (username: string): Promise<boolean> => {
-    const user: typeof UserModel|null = await UserModel.findOne({ username: username });
-    return !!user
-}
-
 const findUsers = async ():Promise<typeof UserModel[]> => {
     return await UserModel.find();
 }
-export { createUser, existsEmail, existsUsername, findUsers }
+
+const deleteUserAPI = async (id:string) => {
+    return await UserModel.deleteOne({_id:id})
+}
+export { createUser, existsEmail, findUsers, deleteUserAPI }

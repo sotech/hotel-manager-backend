@@ -5,12 +5,13 @@ const router = Router();
 
 router.post("/register", 
 check('email')
-.isEmail()
-.withMessage('Debe ingresar un email valido.'), 
+    .isEmail()
+    .withMessage('Debe ingresar un email valido.'), 
 check('password')
-.isLength({min:6})
-.withMessage("La contraseña debe tener 6 caracteres como minimo"), controller.registerUser);
+    .isLength({min:6})
+    .withMessage("La contraseña debe tener 6 caracteres como minimo"), controller.registerUser);
 router.post("/login", controller.logUser);
-router.get("/list", controller.getUsers)
+router.get("/list", controller.getUsers);
+router.delete("/delete/:id", controller.deleteUser)
 
 export default router;

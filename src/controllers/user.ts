@@ -1,13 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import * as bcrypt from 'bcrypt';
 import { UserType } from "../types/types";
-import { createUser, existsEmail, existsUsername, findUsers } from "../api/user";
+import { createUser, existsEmail, findUsers, deleteUserAPI } from "../api/user";
 import { UserModel } from "../models/user";
 import { sendMail } from "../utils/mailer";
 import { validationResult } from "express-validator";
 
 const registerUser = async (req: Request, res: Response, next: NextFunction) => {
-  const { username, email, password, fullname } = req.body;
+  const { email, password, fullname } = req.body;
   const errors = validationResult(req);
 
   if(!errors.isEmpty()){
@@ -16,7 +16,6 @@ const registerUser = async (req: Request, res: Response, next: NextFunction) => 
   }
 
   const user: UserType = {
-    username,
     email,
     password: await bcrypt.hash(password, 10),
     fullname
@@ -24,11 +23,6 @@ const registerUser = async (req: Request, res: Response, next: NextFunction) => 
 
   if (await existsEmail(email)) {
     res.status(400).json({ msg: "Error. Email en uso", code: 'ERROR_EMAIL_USED' })
-    return;
-  }
-
-  if (await existsUsername(username)) {
-    res.status(400).json({ msg: "Error. Username en uso", code: 'ERROR_USERNAME_USED' })
     return;
   }
 
@@ -41,7 +35,6 @@ const registerUser = async (req: Request, res: Response, next: NextFunction) => 
       html: `Usuario creado. Datos:
             <ul>
             <li>Nombre completo:${user.fullname}</li>
-            <li>Usuario: ${user.username}</li>
             <li>Email:${user.email}</li>
             </ul>
       `
@@ -53,16 +46,25 @@ const registerUser = async (req: Request, res: Response, next: NextFunction) => 
       html: `Usuario creado. Datos:
             <ul>
             <li>Nombre completo:${user.fullname}</li>
-            <li>Usuario: ${user.username}</li>
             <li>Email:${user.email}</li>
             </ul>
       `
     })
-    res.status(201).json({ msg: "Exito", userCreated })
+    res.status(201).json({ msg: "Exito"})
   }
   else
-    res.status(500).json({ msg: "Error", userCreated })
+    res.status(500).json({ msg: "Error"})
 };
+
+const deleteUser = async(req: Request, res: Response, next: NextFunction) => {
+  const id = req.params.id;
+  const resp = await deleteUserAPI(id);
+  if(resp.deletedCount > 0){
+    res.status(200).json({msg:"Usuario borrado"})
+  }else{
+    res.status(404).json({msg:"No se encontro el usuario"})
+  }
+}
 
 const logUser = (req: Request, res: Response, next: NextFunction) => {
   //Verificar que el usuario exista
@@ -85,4 +87,4 @@ const getUsers = async (req: Request, res: Response, next: NextFunction) => {
   });
 }
 
-export { registerUser, logUser, getUsers }
+export { registerUser, logUser, getUsers, deleteUser }
