@@ -1,5 +1,6 @@
 import { createTransport } from "nodemailer";
 import * as dotenv from "dotenv";
+import { UserType } from "../types/types";
 
 dotenv.config();
 
@@ -17,22 +18,47 @@ const transporter = createTransport({
     }
 })
 
+const notificarUsuarioCreadoUsuario = (user: UserType) => {
+    sendMail({
+        to: user.email,
+        subject: 'Usuario creado',
+        html: `Usuario creado. Datos:
+              <ul>
+              <li>Nombre completo:${user.fullname}</li>
+              <li>Email:${user.email}</li>
+              </ul>
+        `
+    })
+}
 
-const sendMail = (mailDetails:TypeMailDetails) => {
-    const {to,subject,html} = mailDetails;
+const notificarUsuarioCreadoAdmin = (user: UserType) => {
+    sendMail({
+        to: process.env.USER_MAIL || 'hotel.notifier@gmail.com',
+        subject: 'Usuario creado',
+        html: `Usuario creado. Datos:
+              <ul>
+              <li>Nombre completo:${user.fullname}</li>
+              <li>Email:${user.email}</li>
+              </ul>
+        `
+      })
+}
+
+const sendMail = (mailDetails: TypeMailDetails) => {
+    const { to, subject, html } = mailDetails;
     transporter.sendMail({
-        from:'Hotel Manager',
+        from: 'Hotel Manager',
         to,
         subject,
         html
-    },(err,data) => {
-        if(err){
+    }, (err, data) => {
+        if (err) {
             console.log('An error occurred', err);
-        }else{
+        } else {
             console.log('Mail sent', data)
         }
         return err;
     })
 }
 
-export { sendMail }
+export { sendMail, notificarUsuarioCreadoAdmin, notificarUsuarioCreadoUsuario }
